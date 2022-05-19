@@ -238,6 +238,7 @@ bool startGame()
         {
 //            int dis = getDistance((*it2), &tank, 40); //effort to do a blast when player and enemy near each other
 //            if(dis < 40){(*it2)->isAlive = false; tank.shotDown();}
+            viceToPlayer((*it2), &tank);
             if((*it2)->shootTimer > 3000)
             {
                 (*it2)->shootTimer = 0;

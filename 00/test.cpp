@@ -1,28 +1,23 @@
 #include <iostream>
 
+class A
+{
+    private:
+    int q = 0;
+    public:
+    int w = 1;
+    A() {};
+    void getQ(){std::cout << q << "\n";}
+    void Change()
+    {q = 3; w = 4;}
+};
+
 int main()
 {
-    int i = 0;
-    int a;
-    int b = 0;
-    std::cin >> a;
-    while(b != 2*a)
-    {
-        ++i;
-        std::cout << i << " ";
-        if(a != 2)
-        {
-            if(a == 5)
-            {
-                b += a;
-                std::cout << "first" << "\n";
-                continue;
-            }
-            if(a == 5)
-            {
-                std::cout << "second" << "\n";
-            }
-        }
-        std::cout << "third";
-    }
+    A q;
+    q.getQ();
+    q.Change();
+    q.getQ();
+    return 0;
+
 }

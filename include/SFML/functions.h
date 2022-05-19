@@ -84,7 +84,7 @@ void intersect(Enemy* a, Enemy* b)
 }
 
 
-inline RectangleShape getRect(Vector2f position)
+RectangleShape getRect(Vector2f position)
 {
     RectangleShape a;
     a.setSize(Vector2f(400, 100));
@@ -96,8 +96,68 @@ Vector2f getResp() //function for get position to appear new enemy
 {
     Vector2f p;
     p.y = rand();//непонятно почему, но если брать int из первого рандома, то значение близки к друг другу
-    p.x = rand() % (1280 - 128) + 32;
-    p.y =  rand() % (960 - 128) + 32;
+    p.x = rand() % (1280 - 192) + 32;
+    p.y =  rand() % (960 - 192) + 32;
 
     return p;
+}
+
+void viceToPlayer(Enemy* enemy, Tank* tank)
+{
+    Vector2f e = enemy->sprite.getPosition();
+    Vector2f t = tank->sprite.getPosition();
+    if(abs(e.y - t.y) < 35)
+    {
+        if(abs(e.y - t.y) < 33){return;}
+        switch(enemy->getDirection())
+        {
+            case 0:
+                if(e.x > t.x)
+                {
+                    enemy->setDirection(1);
+                }
+                return;
+            case 1:
+                if(e.x < t.x)
+                {
+                    enemy->setDirection(0);
+                }
+                return;
+            case 2:
+            case 3:
+                if(e.x < t.x)
+                {
+                    enemy->setDirection(0);
+                }
+                enemy->setDirection(1);
+                return;
+        }
+    }
+    if(abs(e.x - t.x) < 35)
+    {
+        if(abs(e.x - t.x) < 33){return;}
+        switch(enemy->getDirection())
+        {
+            case 0:
+            case 1:
+                if(e.y < t.y)
+                {
+                    enemy->setDirection(2);
+                }
+                enemy->setDirection(3);
+                return;
+            case 2:
+                if(e.y > t.y)
+                {
+                    enemy->setDirection(2);
+                }
+                return;
+            case 3:
+                if(e.y < t.y)
+                {
+                    enemy->setDirection(2);
+                }
+                return;
+        }
+    }
 }

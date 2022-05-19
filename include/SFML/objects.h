@@ -106,18 +106,21 @@ public:
 
 class Enemy {
 private:
-    int dir;
+    int dir = rand() % 4;
     float x;
     float y;
-    float speed;
-    float dx, dy;
+    float speed = 0.05;
+    float dx = 0;
+    float dy = 0;
 
 public:
-    int moveTimer;
-    int shootTimer;
-    int health;
-    float w, h;
-    bool isAlive;
+    int timerForHunt = 0;
+    int moveTimer = 0;
+    int shootTimer = 0;
+    int health = 150;
+    float w = 70;
+    float h = 80;
+    bool isAlive = true;
 
     Image image;//сфмл изображение
     Texture texture;//сфмл текстура
@@ -125,14 +128,8 @@ public:
 
     Enemy(Vector2f p)
     {
-        isAlive = true;
-        speed = 0.05;
-        w = 70; h = 80;
-        moveTimer = 0;dir = rand() % 4;shootTimer = 0;
         x = p.x;
         y = p.y;
-        dx = 0;dy = 0;
-        health = 100;
         image.loadFromFile("resources/tank.png");//запихиваем в image наше изображение вместо File мы передадим то, что пропишем при создании объекта. В нашем случае "hero.png" и получится запись идентичная image.loadFromFile("images/hero/png");
         image.createMaskFromColor(Color(255, 255, 255));//убираем ненужный фон
         texture.loadFromImage(image);//закидываем наше изображение в текстуру
@@ -146,6 +143,7 @@ public:
     {
         moveTimer += time;
         shootTimer += time;
+        timerForHunt += time;
         if(moveTimer > 5000) {dir = rand() % 4; moveTimer = 0;}
         switch (dir)//реализуем поведение в зависимости от направления. (каждая цифра соответствует направлению)
         {
@@ -226,6 +224,10 @@ public:
     }
 
     int getDirection(){return dir;}
+    void setDirection(int direction)
+    {
+        dir = direction;moveTimer = 0;
+    }
 
 //    void resetMoveTimer(){moveTimer = 0;}
 
@@ -250,26 +252,27 @@ public:
 class Bullet {
 private:
     int dir;
-    float x, y, speed;
-    float dx, dy;
+    float x, y;
+    float  speed = 0.3;
+    float dx = 0;
+    float dy = 0;
 
 public:
-    float w, h;
-    bool isAlive;
+    float w = 20;
+    float h = 20;
+    bool isAlive = true;
 
     Image image;//сфмл изображение
     Texture texture;//сфмл текстура
     Sprite sprite;//сфмл спрайт
 
     Bullet(float X, float Y, int Direction){
-        isAlive = true; speed = 0.3;
-        dx = 0; dy = 0;
         x = X; y = Y;
-        w = 20; h = 20; dir =  Direction;
-        image.loadFromFile("resources/bullet.png");//запихиваем в image наше изображение вместо File мы передадим то, что пропишем при создании объекта. В нашем случае "hero.png" и получится запись идентичная image.loadFromFile("images/hero/png");
+        dir =  Direction;
+        image.loadFromFile("resources/bullet.png");
         image.createMaskFromColor(Color::White);
-        texture.loadFromImage(image);//закидываем наше изображение в текстуру
-        sprite.setTexture(texture);//заливаем спрайт текстурой
+        texture.loadFromImage(image);
+        sprite.setTexture(texture);
         sprite.setTextureRect({0, 0,  static_cast<int>(w),  static_cast<int>(h)});
         sprite.setOrigin(w/2, h/2);
         sprite.setPosition(x,y);
@@ -345,11 +348,10 @@ private:
     Image i_blast;
     Texture t_blast;
 public:
-    int timer;
+    int timer = 0;
     Sprite blast;
     Pos(Vector2f p)
     {
-        timer = 0;
         i_blast.loadFromFile("resources/blast.png");
         i_blast.createMaskFromColor(Color::White);
         t_blast.loadFromImage(i_blast);
