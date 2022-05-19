@@ -95,28 +95,46 @@ public:
     int getLives(){return lives;}
 
     int getScore(){return Score;}
+    void newGame()
+    {
+        dx = 0;dy = 0;speed = 0;dir = 0;
+        Score = 0;shootTimer = 0;lives = 3;
+    }
 };
 
 
 
-inline int randomInt(int max, int min)
+Vector2f getResp(float w, float h) //function for get position to appear new enemy
 {
-//    srand(time(NULL));
-    int b = rand();//непонятно почему, но если брать int из первого рандома, то значение близки к друг другу
-    int a = rand() % max + min;
-    return a;
+    Vector2f p;
+    p.y = rand();//непонятно почему, но если брать int из первого рандома, то значение близки к друг другу
+    p.x = rand() % (1280 - 32) + 32;
+    p.y =  rand() % (960 - 32) + 32;
+/*
+    for (int i = p.y / 32; i < (p.y + h) / 32; i++)
+    {
+        for (int j = p.x / 32; i < (p.x + w) / 32; i++)
+        {
+            if (TileMap[i][j] == '0')
+            {
+                
+            }
+        }
+    }
+*/
+    return p;
 }
 
 class Enemy {
 private:
     int dir;
-    int moveTimer;
     float x;
     float y;
     float speed;
     float dx, dy;
 
 public:
+    int moveTimer;
     int shootTimer;
     int health;
     float w, h;
@@ -131,11 +149,13 @@ public:
     {
         isAlive = true;
         speed = 0.05;
+        w = W; h = H;
         moveTimer = 0;dir = rand() % 4;shootTimer = 0;
-        x = randomInt(1280 - 128, 32); y = randomInt(960 - 128, 32);
+        x = getResp(w, h).x;
+        y = getResp(w, h).y;
         dx = 0;dy = 0;
         File = F;//имя файла+расширение
-        w = W; h = H; health = 100;
+        health = 100;
         image.loadFromFile("resources/" + File);//запихиваем в image наше изображение вместо File мы передадим то, что пропишем при создании объекта. В нашем случае "hero.png" и получится запись идентичная image.loadFromFile("images/hero/png");
         image.createMaskFromColor(Color(255, 255, 255));//убираем ненужный фон
         texture.loadFromImage(image);//закидываем наше изображение в текстуру
@@ -149,7 +169,7 @@ public:
     {
         moveTimer += time;
         shootTimer += time;
-        if(moveTimer > 3000) {dir = rand() % 4; moveTimer = 0;}
+        if(moveTimer > 5000) {dir = rand() % 4; moveTimer = 0;}
         switch (dir)//реализуем поведение в зависимости от направления. (каждая цифра соответствует направлению)
         {
         case 0:
@@ -195,25 +215,29 @@ public:
                     {
                         y = i * 32 - h;//то стопорим координату игрек персонажа. сначала получаем координату нашего квадратика на карте(стены) и затем вычитаем из высоты спрайта персонажа
                         dir = 3;
-                        moveTimer = 0; break;
+                        //moveTimer = 0;
+                        break;
                     }
                     if (dy<0)
                     {
                         y = i * 32 + 32;//аналогично с ходьбой вверх. dy<0, значит мы идем вверх (вспоминаем координаты паинта)
                         dir = 2;
-                        moveTimer = 0; break;
+                        //moveTimer = 0;
+                        break;
                     }
                     if (dx>0)
                     {
                         x = j * 32 - w;//если идем вправо, то координата Х равна стена (символ 0) минус ширина персонажа
                         dir = 1;
-                        moveTimer = 0; break;
+                        //moveTimer = 0;
+                        break;
                     }
                     if (dx < 0)
                     {
                         x = j * 32 + 32;//аналогично идем влево
                         dir = 0;
-                        moveTimer = 0; break;
+                        //moveTimer = 0;
+                        break;
                     }
                 }
             }
@@ -223,7 +247,7 @@ public:
 
     int getDirection(){return dir;}
 
-    void resetMoveTimer(){moveTimer = 0;}
+//    void resetMoveTimer(){moveTimer = 0;}
 
     void turnAround()
     {
@@ -335,6 +359,26 @@ public:
         }
     }
     FloatRect getRect(){return {static_cast<float>(x), static_cast<float>(y), w, h};}
+};
+
+class Pos {
+private:
+    Image i_blast;
+    Texture t_blast;
+public:
+    int timer;
+    Sprite blast;
+    Pos(Vector2f p)
+    {
+        timer = 0;
+        i_blast.loadFromFile("resources/blast.png");
+        i_blast.createMaskFromColor(Color::White);
+        t_blast.loadFromImage(i_blast);
+        blast.setTexture(t_blast);
+        blast.setOrigin(35, 35);
+        blast.setPosition(p);
+    }
+    void update(int time){timer += time;}
 };
 
 /*//effort to do a sound and image destroyed o enemy

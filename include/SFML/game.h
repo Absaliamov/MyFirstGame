@@ -24,7 +24,7 @@ bool menu(RenderWindow & window) {
     Music music;
     music.openFromFile("resources/menu_music.flac");
     music.play();music.setLoop(true);
-    music.setVolume(70);
+    music.setVolume(80);
     Texture menuTexture1, menuTexture2,menuBackground;
     menuTexture1.loadFromFile("resources/start.png");
     menuTexture2.loadFromFile("resources/exit.png");
@@ -56,8 +56,8 @@ bool menu(RenderWindow & window) {
 
         if (Mouse::isButtonPressed(Mouse::Left))
         {
-            if (menuNum == 1){return false;}//если нажали первую кнопку, то выходим из меню 
-            if (menuNum == 2){window.close(); return true;}
+            if (menuNum == 1){music.stop(); return false;}//если нажали первую кнопку, то выходим из меню 
+            if (menuNum == 2){window.close();music.stop(); return true;}
         }
 
         window.draw(menuBg);
@@ -88,7 +88,6 @@ void drawHearts(Tank& tank, RenderWindow& window, Sprite& heart)
 
 void intersect(Enemy* a, Enemy* b)
 {
-    a->resetMoveTimer(); b->resetMoveTimer();
     switch(a->getDirection())
     {
         case 0:
@@ -161,26 +160,21 @@ int getDistance(Enemy* a, Tank* b, int& min_d)
     return distance;
 }
 */
-class Pos {
-private:
-    Image i_blast;
-    Texture t_blast;
-public:
-    int timer;
-    Sprite blast;
-    Pos(Vector2f p)
-    {
-        timer = 0;
-        i_blast.loadFromFile("resources/blast.png");
-        i_blast.createMaskFromColor(Color::White);
-        t_blast.loadFromImage(i_blast);
-        blast.setTexture(t_blast);
-        blast.setOrigin(35, 35);
-        blast.setPosition(p);
-    }
-    void update(int time){timer += time;}
-};
 
+
+
+
+Tank tank("tank.png", window_a / 2, window_b / 2, 70, 80);
+
+std::list<Bullet*> bullets;
+std::list<Bullet*>::iterator it1;
+
+std::list<Enemy*> enemies;
+std::list<Enemy*>::iterator it2;
+std::list<Enemy*>::iterator it22;
+
+std::list<Pos*> positions;
+std::list<Pos*>::iterator it3;
 
 bool startGame()
 {
@@ -190,10 +184,6 @@ bool startGame()
     Music music;
     music.openFromFile("resources/music.flac");
     music.play();music.setLoop(true);music.setVolume(50);
-
-    Tank tank("tank.png", window_a / 2, window_b / 2, 70, 80);
-
-//    view.reset(sf::FloatRect(0, 0, 640, 480));
 
     Font font;
     font.loadFromFile("resources/font.ttf");
@@ -218,16 +208,6 @@ bool startGame()
     t_wall.loadFromFile("resources/stone.png");
     Sprite s_wall;
     s_wall.setTexture(t_wall);
-
-    std::list<Bullet*> bullets;
-    std::list<Bullet*>::iterator it1;
-
-    std::list<Enemy*> enemies;
-    std::list<Enemy*>::iterator it2;
-    std::list<Enemy*>::iterator it22;
-
-    std::list<Pos*> positions;
-    std::list<Pos*>::iterator it3;
 
     enemies.push_back(new Enemy("tank.png",70, 80));
     int enemyTimer = 0;
@@ -255,7 +235,7 @@ bool startGame()
             {
                 if(event.key.code == Keyboard::Space)
                 {
-                    if(tank.shootTimer > 1500)
+                    if(tank.shootTimer > 1200)
                     {
                         tank.shootTimer = 0;
                         int X = tank.sprite.getPosition().x;
@@ -276,8 +256,6 @@ bool startGame()
                 }
             }
         }
-
-
 
         {//управление игроком клавишами
             if ((Keyboard::isKeyPressed(Keyboard::Left)))
@@ -305,21 +283,24 @@ bool startGame()
             }
         }
 
+
         L1:
-
-
         for(it1 = bullets.begin(); it1 != bullets.end(); it1++)
         {
             for(it2 = enemies.begin(); it2 != enemies.end(); it2++)
             {
+//                std::cout << (*it2)->moveTimer << " ";
                 if((*it1)->getRect().intersects((*it2)->getRect()))
                 {
-                    (*it1)->isAlive = false;(*it2)->health -= 50;
+                    (*it2)->health -= 50;
+                    bullets.remove(*it1); continue;
                 }
             }
+//            std::cout << "\n";
             if((*it1)->getRect().intersects(tank.getRect()))
             {
-                (*it1)->isAlive = false; tank.shotDown();
+                tank.shotDown();
+                bullets.remove(*it1);
             }
         }
         if(tank.getLives() == -1)
@@ -350,17 +331,15 @@ bool startGame()
 
         for(it1 = bullets.begin();it1 != bullets.end(); it1++)
         {
-            if(!(*it1)->isAlive){bullets.remove((*it1));}
-            (*it1)->update(time);
-
+            if(!(*it1)->isAlive){bullets.remove((*it1)); continue;}
             window.draw((*it1)->sprite);
+            (*it1)->update(time);
         }
 
         for(it2 = enemies.begin(); it2 != enemies.end(); it2++)
         {
 //            int dis = getDistance((*it2), &tank, 40); //effort to do a blast when player and enemy near each other
 //            if(dis < 40){(*it2)->isAlive = false; tank.shotDown();}
-
             if((*it2)->shootTimer > 3000)
             {
                 (*it2)->shootTimer = 0;
@@ -390,15 +369,17 @@ bool startGame()
             }
             if((*it2)->getRect().intersects(tank.getRect()))
             {
-                (*it2)->isAlive = false; tank.shotDown();
+                tank.shotDown();goto L3;
             }
 
-            if((*it2)->health <= 0){(*it2)->isAlive = false; tank.kill();}
+            if((*it2)->health <= 0){tank.kill(); goto L3;}
             if(!(*it2)->isAlive)
             {
+                L3:
+                positions.push_back(new Pos((*it2)->sprite.getPosition()));
                 enemies.remove((*it2));
                 sound.play();
-                positions.push_back(new Pos((*it2)->sprite.getPosition()));
+                continue;
             }
             (*it2)->update(time);
             window.draw((*it2)->sprite);
@@ -406,12 +387,14 @@ bool startGame()
 
         for(it3 = positions.begin(); it3 != positions.end(); it3++)
         {
-            (*it3)->update(time);
             if((*it3)->timer < 300)
             {
                 window.draw((*it3)->blast);
-            } else
-                positions.remove(*it3);
+            } else 
+            {
+                positions.remove(*it3); continue;
+            }
+            (*it3)->update(time);
         }
 
         drawHearts(tank, window, heart);
@@ -448,7 +431,9 @@ bool startGame()
         if(Timer > 30000)
             window.close();
     }
-
-
+    tank.newGame();
+    enemies.clear();
+    positions.clear();
+    bullets.clear();
     return (true + ans) % 2;//because of in menu if we press exit, menu will appear again
 }
