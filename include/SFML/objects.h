@@ -104,27 +104,6 @@ public:
 
 
 
-Vector2f getResp(float w, float h) //function for get position to appear new enemy
-{
-    Vector2f p;
-    p.y = rand();//непонятно почему, но если брать int из первого рандома, то значение близки к друг другу
-    p.x = rand() % (1280 - 32) + 32;
-    p.y =  rand() % (960 - 32) + 32;
-/*
-    for (int i = p.y / 32; i < (p.y + h) / 32; i++)
-    {
-        for (int j = p.x / 32; i < (p.x + w) / 32; i++)
-        {
-            if (TileMap[i][j] == '0')
-            {
-                
-            }
-        }
-    }
-*/
-    return p;
-}
-
 class Enemy {
 private:
     int dir;
@@ -140,23 +119,21 @@ public:
     float w, h;
     bool isAlive;
 
-    String File; //файл с расширением
     Image image;//сфмл изображение
     Texture texture;//сфмл текстура
     Sprite sprite;//сфмл спрайт
 
-    Enemy(String F,int W, int H)
+    Enemy(Vector2f p)
     {
         isAlive = true;
         speed = 0.05;
-        w = W; h = H;
+        w = 70; h = 80;
         moveTimer = 0;dir = rand() % 4;shootTimer = 0;
-        x = getResp(w, h).x;
-        y = getResp(w, h).y;
+        x = p.x;
+        y = p.y;
         dx = 0;dy = 0;
-        File = F;//имя файла+расширение
         health = 100;
-        image.loadFromFile("resources/" + File);//запихиваем в image наше изображение вместо File мы передадим то, что пропишем при создании объекта. В нашем случае "hero.png" и получится запись идентичная image.loadFromFile("images/hero/png");
+        image.loadFromFile("resources/tank.png");//запихиваем в image наше изображение вместо File мы передадим то, что пропишем при создании объекта. В нашем случае "hero.png" и получится запись идентичная image.loadFromFile("images/hero/png");
         image.createMaskFromColor(Color(255, 255, 255));//убираем ненужный фон
         texture.loadFromImage(image);//закидываем наше изображение в текстуру
         sprite.setTexture(texture);//заливаем спрайт текстурой
@@ -243,7 +220,10 @@ public:
             }
         }
     }
-    FloatRect getRect(){return {static_cast<float>(x), static_cast<float>(y), w, h};}
+    FloatRect getRect()
+    {
+        return {static_cast<float>(x), static_cast<float>(y), w, h};
+    }
 
     int getDirection(){return dir;}
 
@@ -277,17 +257,16 @@ public:
     float w, h;
     bool isAlive;
 
-    String File; //файл с расширением
     Image image;//сфмл изображение
     Texture texture;//сфмл текстура
     Sprite sprite;//сфмл спрайт
 
-    Bullet(String F, float X, float Y, float W, float H, int Direction){
+    Bullet(float X, float Y, int Direction){
         isAlive = true; speed = 0.3;
-        dx = 0; dy = 0; File = F;
+        dx = 0; dy = 0;
         x = X; y = Y;
-        w = W; h = H; dir =  Direction;
-        image.loadFromFile("resources/" + File);//запихиваем в image наше изображение вместо File мы передадим то, что пропишем при создании объекта. В нашем случае "hero.png" и получится запись идентичная image.loadFromFile("images/hero/png");
+        w = 20; h = 20; dir =  Direction;
+        image.loadFromFile("resources/bullet.png");//запихиваем в image наше изображение вместо File мы передадим то, что пропишем при создании объекта. В нашем случае "hero.png" и получится запись идентичная image.loadFromFile("images/hero/png");
         image.createMaskFromColor(Color::White);
         texture.loadFromImage(image);//закидываем наше изображение в текстуру
         sprite.setTexture(texture);//заливаем спрайт текстурой

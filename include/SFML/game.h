@@ -4,6 +4,7 @@
 #include <sstream>
 #include <iostream>
 #include "SFML/objects.h"
+#include "SFML/functions.h"
 #include <math.h>
 #include <list>
 
@@ -12,13 +13,6 @@ using namespace sf;
 int window_a = 1280;
 int window_b = 960;
 
-inline RectangleShape getRect(Vector2f position)
-{
-    RectangleShape a;
-    a.setSize(Vector2f(400, 100));
-    a.setPosition(position);
-    return a;
-}
 
 bool menu(RenderWindow & window) {
     Music music;
@@ -67,101 +61,6 @@ bool menu(RenderWindow & window) {
     }
 }
 
-void drawScore(Tank& tank, RenderWindow& window, Text& text)
-{
-    std::ostringstream score;
-    score << tank.getScore();
-    text.setString("Score:" + score.str());
-    text.setPosition(1100, -10);
-    window.draw(text);
-}
-
-void drawHearts(Tank& tank, RenderWindow& window, Sprite& heart)
-{
-    for(int i = 0; i <= tank.getLives(); i++)
-    {
-        heart.setOrigin(heart.getTextureRect().width/2,heart.getTextureRect().height/2);
-        heart.setPosition(2 * heart.getTextureRect().width * (i+1), 16);
-        window.draw(heart);
-    }
-}
-
-void intersect(Enemy* a, Enemy* b)
-{
-    switch(a->getDirection())
-    {
-        case 0:
-            switch(b->getDirection())
-            {
-                case 1:
-                    a->turnAround(); b->turnAround();
-                    return;
-                case 2:
-                case 3:
-                    if(a->sprite.getPosition().x < b->sprite.getPosition().x)
-                    {
-                        a->turnAround();
-                    } else
-                        b->turnAround();
-            }
-            return;
-        case 1:
-            switch(b->getDirection())
-            {
-                case 0:
-                    a->turnAround(); b->turnAround(); return;
-                case 2:
-                case 3:
-                    if(a->sprite.getPosition().x > b->sprite.getPosition().x)
-                    {
-                        a->turnAround();
-                    } else
-                        b->turnAround();
-            }
-            return;
-        case 2:
-            switch(b->getDirection())
-            {
-                case 0:
-                case 1:
-                    if(a->sprite.getPosition().y < b->sprite.getPosition().y)
-                    {
-                        a->turnAround();
-                    } else
-                        b->turnAround();
-                    return;
-                case 3:
-                a->turnAround(); b->turnAround(); return;
-            }
-        case 3:
-            switch(b->getDirection())
-            {
-                case 0:
-                case 1:
-                    if(a->sprite.getPosition().y > b->sprite.getPosition().y)
-                    {
-                        a->turnAround();
-                    } else
-                        b->turnAround();
-                    return;
-                case 2:
-                    a->turnAround(); b->turnAround();
-            }
-    }
-}
-/* //not use. Written to ralizea blast, if enemy is so near
-int getDistance(Enemy* a, Tank* b, int& min_d)
-{
-    int x1 = a->sprite.getPosition().x;int y1 = a->sprite.getPosition().y;
-    int x2 = b->sprite.getPosition().x;int y2 = b->sprite.getPosition().y;
-    int distance = sqrt((x1 - x2)^2 + (y1 - y2)^2);
-    distance = abs(distance);
-    if(!(distance / min_d)){return min_d;}
-    return distance;
-}
-*/
-
-
 
 
 Tank tank("tank.png", window_a / 2, window_b / 2, 70, 80);
@@ -209,7 +108,7 @@ bool startGame()
     Sprite s_wall;
     s_wall.setTexture(t_wall);
 
-    enemies.push_back(new Enemy("tank.png",70, 80));
+    enemies.push_back(new Enemy(getResp()));
     int enemyTimer = 0;
     int Timer = 0;
 
@@ -244,13 +143,13 @@ bool startGame()
                         switch(d)
                         {
                         case 0:
-                            bullets.push_back(new Bullet("bullet.png", X + 50, Y - 7,20, 20, d)); break;
+                            bullets.push_back(new Bullet(X + 50, Y - 7, d)); break;
                         case 1:
-                            bullets.push_back(new Bullet("bullet.png", X - 55, Y - 12,20, 20, d)); break;
+                            bullets.push_back(new Bullet(X - 55, Y - 12, d)); break;
                         case 2:
-                            bullets.push_back(new Bullet("bullet.png", X - 20, Y + 45, 20, 20, d)); break;
+                            bullets.push_back(new Bullet(X - 20, Y + 45, d)); break;
                         case 3:
-                            bullets.push_back(new Bullet("bullet.png", X, Y - 60, 20, 20, d)); break;
+                            bullets.push_back(new Bullet(X, Y - 60, d)); break;
                         }
                     }
                 }
@@ -287,20 +186,19 @@ bool startGame()
         L1:
         for(it1 = bullets.begin(); it1 != bullets.end(); it1++)
         {
-            for(it2 = enemies.begin(); it2 != enemies.end(); it2++)
-            {
-//                std::cout << (*it2)->moveTimer << " ";
-                if((*it1)->getRect().intersects((*it2)->getRect()))
-                {
-                    (*it2)->health -= 50;
-                    bullets.remove(*it1); continue;
-                }
-            }
-//            std::cout << "\n";
             if((*it1)->getRect().intersects(tank.getRect()))
             {
                 tank.shotDown();
                 bullets.remove(*it1);
+                continue;
+            }
+            for(it2 = enemies.begin(); it2 != enemies.end(); it2++)
+            {
+                if((*it1)->getRect().intersects((*it2)->getRect()))
+                {
+                    (*it2)->health -= 50;
+                    bullets.remove(*it1);
+                }
             }
         }
         if(tank.getLives() == -1)
@@ -325,15 +223,15 @@ bool startGame()
 
         if((enemyTimer > 7000 && enemies.size() < 5) || enemies.size() == 0)
         {
-            enemies.push_back(new Enemy("tank.png", 70, 80));
+            enemies.push_back(new Enemy(getResp()));
             enemyTimer = 0;
         }
 
         for(it1 = bullets.begin();it1 != bullets.end(); it1++)
         {
+            (*it1)->update(time);
             if(!(*it1)->isAlive){bullets.remove((*it1)); continue;}
             window.draw((*it1)->sprite);
-            (*it1)->update(time);
         }
 
         for(it2 = enemies.begin(); it2 != enemies.end(); it2++)
@@ -349,16 +247,15 @@ bool startGame()
                 switch(d)
                 {
                 case 0:
-                    bullets.push_back(new Bullet("bullet.png", X + 50, Y - 7,20, 20, d)); goto L2;
+                    bullets.push_back(new Bullet(X + 50, Y - 7, d)); break;
                 case 1:
-                    bullets.push_back(new Bullet("bullet.png", X - 55, Y - 12,20, 20, d)); goto L2;
+                    bullets.push_back(new Bullet(X - 55, Y - 12, d)); break;
                 case 2:
-                    bullets.push_back(new Bullet("bullet.png", X - 20, Y + 45, 20, 20, d)); goto L2;
+                    bullets.push_back(new Bullet(X - 20, Y + 45, d)); break;
                 case 3:
-                    bullets.push_back(new Bullet("bullet.png", X, Y - 60, 20, 20, d));
+                    bullets.push_back(new Bullet(X, Y - 60, d));
                 }
             }
-            L2:
 
             for(it22 = enemies.begin(); it22 != enemies.end(); it22++)
             {
@@ -369,13 +266,13 @@ bool startGame()
             }
             if((*it2)->getRect().intersects(tank.getRect()))
             {
-                tank.shotDown();goto L3;
+                tank.shotDown();goto L2;
             }
 
-            if((*it2)->health <= 0){tank.kill(); goto L3;}
+            if((*it2)->health <= 0){tank.kill(); goto L2;}
             if(!(*it2)->isAlive)
             {
-                L3:
+                L2:
                 positions.push_back(new Pos((*it2)->sprite.getPosition()));
                 enemies.remove((*it2));
                 sound.play();
@@ -388,11 +285,11 @@ bool startGame()
         for(it3 = positions.begin(); it3 != positions.end(); it3++)
         {
             if((*it3)->timer < 300)
-            {
                 window.draw((*it3)->blast);
-            } else 
+            else
             {
-                positions.remove(*it3); continue;
+                positions.remove(*it3);
+                continue;
             }
             (*it3)->update(time);
         }
