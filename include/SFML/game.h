@@ -12,7 +12,7 @@ using namespace sf;
 int window_a = 1280;
 int window_b = 960;
 
-RectangleShape getRect(Vector2f position)
+inline RectangleShape getRect(Vector2f position)
 {
     RectangleShape a;
     a.setSize(Vector2f(400, 100));
@@ -30,14 +30,12 @@ bool menu(RenderWindow & window) {
     menuTexture2.loadFromFile("resources/exit.png");
     menuBackground.loadFromFile("resources/back.jpg");
     Sprite menu1(menuTexture1), menu2(menuTexture2), menuBg(menuBackground);
-    bool isMenu = 1;
-    bool ans;
     int menuNum = 0;
     menu1.setPosition(100, 30);
     menu2.setPosition(100, 90);
     menuBg.setPosition(0, 0);
 
-    while (isMenu)
+    while (1)
     {
         Event event;
         while (window.pollEvent(event))
@@ -58,17 +56,15 @@ bool menu(RenderWindow & window) {
 
         if (Mouse::isButtonPressed(Mouse::Left))
         {
-            if (menuNum == 1){isMenu = false; ans = false;}//если нажали первую кнопку, то выходим из меню 
-            if (menuNum == 2){window.close(); isMenu = false; ans = true;}
+            if (menuNum == 1){return false;}//если нажали первую кнопку, то выходим из меню 
+            if (menuNum == 2){window.close(); return true;}
         }
 
         window.draw(menuBg);
         window.draw(menu1);
         window.draw(menu2);
-
         window.display();
     }
-    return ans;
 }
 
 void drawScore(Tank& tank, RenderWindow& window, Text& text)
@@ -96,56 +92,65 @@ void intersect(Enemy* a, Enemy* b)
     switch(a->getDirection())
     {
         case 0:
-            if(b->getDirection() == 1){a->turnAround(); b->turnAround();}
-            if(b->getDirection() == 2 || b->getDirection() == 3)
+            switch(b->getDirection())
             {
-                if(a->sprite.getPosition().x < b->sprite.getPosition().x)
-                {
-                    a->turnAround();
-                } else {
-                    b->turnAround();
-                }
+                case 1:
+                    a->turnAround(); b->turnAround();
+                    return;
+                case 2:
+                case 3:
+                    if(a->sprite.getPosition().x < b->sprite.getPosition().x)
+                    {
+                        a->turnAround();
+                    } else
+                        b->turnAround();
             }
-            break;
+            return;
         case 1:
-            if(b->getDirection() == 0){a->turnAround(); b->turnAround();}
-            if(b->getDirection() == 2 || b->getDirection() == 3)
+            switch(b->getDirection())
             {
-                if(a->sprite.getPosition().x > b->sprite.getPosition().x)
-                {
-                    a->turnAround();
-                } else {
-                    b->turnAround();
-                }
+                case 0:
+                    a->turnAround(); b->turnAround(); return;
+                case 2:
+                case 3:
+                    if(a->sprite.getPosition().x > b->sprite.getPosition().x)
+                    {
+                        a->turnAround();
+                    } else
+                        b->turnAround();
             }
-            break;
+            return;
         case 2:
-            if(b->getDirection() == 3){a->turnAround(); b->turnAround();}
-            if(b->getDirection() == 0 || b->getDirection() == 1)
+            switch(b->getDirection())
             {
-                if(a->sprite.getPosition().y < b->sprite.getPosition().y)
-                {
-                    a->turnAround();
-                } else {
-                    b->turnAround();
-                }
+                case 0:
+                case 1:
+                    if(a->sprite.getPosition().y < b->sprite.getPosition().y)
+                    {
+                        a->turnAround();
+                    } else
+                        b->turnAround();
+                    return;
+                case 3:
+                a->turnAround(); b->turnAround(); return;
             }
-            break;
         case 3:
-            if(b->getDirection() == 2){a->turnAround(); b->turnAround();}
-            if(b->getDirection() == 0 || b->getDirection() == 1)
+            switch(b->getDirection())
             {
-                if(a->sprite.getPosition().y > b->sprite.getPosition().y)
-                {
-                    a->turnAround();
-                } else {
-                    b->turnAround();
-                }
+                case 0:
+                case 1:
+                    if(a->sprite.getPosition().y > b->sprite.getPosition().y)
+                    {
+                        a->turnAround();
+                    } else
+                        b->turnAround();
+                    return;
+                case 2:
+                    a->turnAround(); b->turnAround();
             }
-            break;
     }
 }
-
+/* //not use. Written to ralizea blast, if enemy is so near
 int getDistance(Enemy* a, Tank* b, int& min_d)
 {
     int x1 = a->sprite.getPosition().x;int y1 = a->sprite.getPosition().y;
@@ -155,12 +160,14 @@ int getDistance(Enemy* a, Tank* b, int& min_d)
     if(!(distance / min_d)){return min_d;}
     return distance;
 }
-
-struct Pos {
+*/
+class Pos {
+private:
     Image i_blast;
     Texture t_blast;
-    Sprite blast;
+public:
     int timer;
+    Sprite blast;
     Pos(Vector2f p)
     {
         timer = 0;
@@ -217,6 +224,7 @@ bool startGame()
 
     std::list<Enemy*> enemies;
     std::list<Enemy*>::iterator it2;
+    std::list<Enemy*>::iterator it22;
 
     std::list<Pos*> positions;
     std::list<Pos*>::iterator it3;
@@ -224,7 +232,6 @@ bool startGame()
     enemies.push_back(new Enemy("tank.png",70, 80));
     int enemyTimer = 0;
     int Timer = 0;
-
 
     Clock clock;
 
@@ -277,16 +284,19 @@ bool startGame()
             {
                 tank.setDirection(1);tank.setSpeed(0.1);
                 tank.sprite.setTextureRect(IntRect(330, 160, -90, -80));
+                goto L1;
             }
             if ((Keyboard::isKeyPressed(Keyboard::Right)))
             {
                 tank.setDirection(0);tank.setSpeed(0.1);
                 tank.sprite.setTextureRect(IntRect(240, 80, 90, 80));
+                goto L1;
             }
             if ((Keyboard::isKeyPressed(Keyboard::Up)))
             { 
                 tank.setDirection(3);tank.setSpeed(0.1);
                 tank.sprite.setTextureRect(IntRect(70, 80, 70, 80));
+                goto L1;
             }
             if ((Keyboard::isKeyPressed(Keyboard::Down)))
             {
@@ -294,6 +304,8 @@ bool startGame()
                 tank.sprite.setTextureRect(IntRect(140, 160, -70, -80));
             }
         }
+
+        L1:
 
 
         for(it1 = bullets.begin(); it1 != bullets.end(); it1++)
@@ -358,21 +370,22 @@ bool startGame()
                 switch(d)
                 {
                 case 0:
-                    bullets.push_back(new Bullet("bullet.png", X + 50, Y - 7,20, 20, d)); break;
+                    bullets.push_back(new Bullet("bullet.png", X + 50, Y - 7,20, 20, d)); goto L2;
                 case 1:
-                    bullets.push_back(new Bullet("bullet.png", X - 55, Y - 12,20, 20, d)); break;
+                    bullets.push_back(new Bullet("bullet.png", X - 55, Y - 12,20, 20, d)); goto L2;
                 case 2:
-                    bullets.push_back(new Bullet("bullet.png", X - 20, Y + 45, 20, 20, d)); break;
+                    bullets.push_back(new Bullet("bullet.png", X - 20, Y + 45, 20, 20, d)); goto L2;
                 case 3:
-                    bullets.push_back(new Bullet("bullet.png", X, Y - 60, 20, 20, d)); break;
+                    bullets.push_back(new Bullet("bullet.png", X, Y - 60, 20, 20, d));
                 }
             }
+            L2:
 
-            for(auto& a : enemies)
+            for(it22 = enemies.begin(); it22 != enemies.end(); it22++)
             {
-                if((*it2)->getRect().intersects(a->getRect()))
+                if((*it2)->getRect().intersects((*it22)->getRect()))
                 {
-                    intersect(*it2, a);
+                    intersect(*it2, *it22);
                 }
             }
             if((*it2)->getRect().intersects(tank.getRect()))
@@ -398,9 +411,7 @@ bool startGame()
             {
                 window.draw((*it3)->blast);
             } else
-            {
                 positions.remove(*it3);
-            }
         }
 
         drawHearts(tank, window, heart);
@@ -437,6 +448,7 @@ bool startGame()
         if(Timer > 30000)
             window.close();
     }
+
 
     return (true + ans) % 2;//because of in menu if we press exit, menu will appear again
 }

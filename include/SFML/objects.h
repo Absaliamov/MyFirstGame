@@ -3,11 +3,11 @@ using namespace sf;
 
 class Tank { // класс Игрока
 private:
-    float x, y, speed;
-    int dir;
-    float dx, dy;
     int Score;
     int lives;
+    float x, y, speed;
+    float dx, dy;
+    int dir;
 public:
     int shootTimer;
 
@@ -38,7 +38,7 @@ public:
         case 0: dx = speed; dy = 0; break;//по иксу задаем положительную скорость, по игреку зануляем. получаем, что персонаж идет только вправо
         case 1: dx = -speed; dy = 0; break;//по иксу задаем отрицательную скорость, по игреку зануляем. получается, что персонаж идет только влево
         case 2: dx = 0; dy = speed; break;//по иксу задаем нулевое значение, по игреку положительное. получается, что персонаж идет только вниз
-        case 3: dx = 0; dy = -speed; break;//по иксу задаем нулевое значение, по игреку отрицательное. получается, что персонаж идет только вверх
+        case 3: dx = 0; dy = -speed;//по иксу задаем нулевое значение, по игреку отрицательное. получается, что персонаж идет только вверх
         }
 
         x += dx*time;//то движение из прошлого урока. наше ускорение на время получаем смещение координат и как следствие движение
@@ -60,15 +60,18 @@ public:
                 {
                     if (dy>0)//если мы шли вниз,
                     {
-                        y = i * 32 - h;//то стопорим координату игрек персонажа. сначала получаем координату нашего квадратика на карте(стены) и затем вычитаем из высоты спрайта персонажа.
+                        y = i * 32 - h;
+                        break;//то стопорим координату игрек персонажа. сначала получаем координату нашего квадратика на карте(стены) и затем вычитаем из высоты спрайта персонажа.
                     }
                     if (dy<0)
                     {
-                        y = i * 32 + 32;//аналогично с ходьбой вверх. dy<0, значит мы идем вверх (вспоминаем координаты паинта)
+                        y = i * 32 + 32;
+                        break;//аналогично с ходьбой вверх. dy<0, значит мы идем вверх (вспоминаем координаты паинта)
                     }
                     if (dx>0)
                     {
-                        x = j * 32 - w;//если идем вправо, то координата Х равна стена (символ 0) минус ширина персонажа
+                        x = j * 32 - w;
+                        break;//если идем вправо, то координата Х равна стена (символ 0) минус ширина персонажа
                     }
                     if (dx < 0)
                     {
@@ -85,7 +88,7 @@ public:
     int getDirection(){return dir;}
     void kill(){Score += 20;}
 
-    FloatRect getRect(){return FloatRect(x, y, w, h);}
+    FloatRect getRect(){return {x, y, w, h};}
 
     void shotDown(){--lives;}
 
@@ -96,7 +99,7 @@ public:
 
 
 
-int randomInt(int max, int min)
+inline int randomInt(int max, int min)
 {
 //    srand(time(NULL));
     int b = rand();//непонятно почему, но если брать int из первого рандома, то значение близки к друг другу
@@ -115,9 +118,9 @@ private:
 
 public:
     int shootTimer;
-    bool isAlive;
-    float w, h;
     int health;
+    float w, h;
+    bool isAlive;
 
     String File; //файл с расширением
     Image image;//сфмл изображение
@@ -138,7 +141,7 @@ public:
         texture.loadFromImage(image);//закидываем наше изображение в текстуру
         sprite.setTexture(texture);//заливаем спрайт текстурой
         sprite.setColor(sf::Color::Red);
-        sprite.setTextureRect(IntRect(w, h, w, h));
+        sprite.setTextureRect({static_cast<int>(w), static_cast<int>(h), static_cast<int>(w), static_cast<int>(h)});
         sprite.setOrigin(w/2, h/2);
         sprite.setPosition(x,y);
     }
@@ -151,24 +154,24 @@ public:
         {
         case 0:
             dx = speed; dy = 0;
-            sprite.setTextureRect(IntRect(240, 80, 90, 80));
+            sprite.setTextureRect({240, 80, 90, 80});
             sprite.setOrigin(w/2,h/2);
             break;//по иксу задаем положительную скорость, по игреку зануляем. получаем, что персонаж идет только вправо
         case 1:
             dx = -speed; dy = 0;
-            sprite.setTextureRect(IntRect(330, 160, -90, -80));
+            sprite.setTextureRect({330, 160, -90, -80});
             sprite.setOrigin(w/2,h/2);
             break;//по иксу задаем отрицательную скорость, по игреку зануляем. получается, что персонаж идет только влево
         case 2:
             dx = 0; dy = speed;
-            sprite.setTextureRect(IntRect(140, 160, -70, -80));
+            sprite.setTextureRect({140, 160, -70, -80});
             sprite.setOrigin(w/2,h/2);
             break;//по иксу задаем нулевое значение, по игреку положительное. получается, что персонаж идет только вниз
         case 3:
             dx = 0; dy = -speed;
-            sprite.setTextureRect(IntRect(w, h, w, h));
+            sprite.setTextureRect({ static_cast<int>(w), static_cast<int>(h), static_cast<int>(w), static_cast<int>(h)});
             sprite.setOrigin(w/2, h/2);
-            break;//по иксу задаем нулевое значение, по игреку отрицательное. получается, что персонаж идет только вверх
+//по иксу задаем нулевое значение, по игреку отрицательное. получается, что персонаж идет только вверх
         }
 
         x += dx*time;//то движение из прошлого урока. наше ускорение на время получаем смещение координат и как следствие движение
@@ -192,31 +195,31 @@ public:
                     {
                         y = i * 32 - h;//то стопорим координату игрек персонажа. сначала получаем координату нашего квадратика на карте(стены) и затем вычитаем из высоты спрайта персонажа
                         dir = 3;
-                        moveTimer = 0;
+                        moveTimer = 0; break;
                     }
                     if (dy<0)
                     {
                         y = i * 32 + 32;//аналогично с ходьбой вверх. dy<0, значит мы идем вверх (вспоминаем координаты паинта)
                         dir = 2;
-                        moveTimer = 0;
+                        moveTimer = 0; break;
                     }
                     if (dx>0)
                     {
                         x = j * 32 - w;//если идем вправо, то координата Х равна стена (символ 0) минус ширина персонажа
                         dir = 1;
-                        moveTimer = 0;
+                        moveTimer = 0; break;
                     }
                     if (dx < 0)
                     {
                         x = j * 32 + 32;//аналогично идем влево
                         dir = 0;
-                        moveTimer = 0;
+                        moveTimer = 0; break;
                     }
                 }
             }
         }
     }
-    FloatRect getRect(){return FloatRect(x, y, w, h);}
+    FloatRect getRect(){return {static_cast<float>(x), static_cast<float>(y), w, h};}
 
     int getDirection(){return dir;}
 
@@ -234,7 +237,7 @@ public:
         case 2:
             dir = 3; break;
         case 3:
-            dir = 2; break;
+            dir = 2;
         }
     }
 };
@@ -242,13 +245,13 @@ public:
 
 class Bullet {
 private:
+    int dir;
     float x, y, speed;
     float dx, dy;
-    int dir;
 
 public:
-    bool isAlive;
     float w, h;
+    bool isAlive;
 
     String File; //файл с расширением
     Image image;//сфмл изображение
@@ -264,7 +267,7 @@ public:
         image.createMaskFromColor(Color::White);
         texture.loadFromImage(image);//закидываем наше изображение в текстуру
         sprite.setTexture(texture);//заливаем спрайт текстурой
-        sprite.setTextureRect(IntRect(0, 0, w, h));
+        sprite.setTextureRect({0, 0,  static_cast<int>(w),  static_cast<int>(h)});
         sprite.setOrigin(w/2, h/2);
         sprite.setPosition(x,y);
     }
@@ -287,7 +290,7 @@ public:
             break;//по иксу задаем нулевое значение, по игреку положительное. получается, что персонаж идет только вниз
         case 3:
             dx = 0; dy = -speed;
-            break;//по иксу задаем нулевое значение, по игреку отрицательное. получается, что персонаж идет только вверх
+//по иксу задаем нулевое значение, по игреку отрицательное. получается, что персонаж идет только вверх
         }
 
         x += dx*time;//то движение из прошлого урока. наше ускорение на время получаем смещение координат и как следствие движение
@@ -309,26 +312,29 @@ public:
                     isAlive = false;
                     if (dy>0)//если мы шли вниз,
                     {
-                        y = i * 32 - h;
+                        y = i * 32 - h; break;
 
                     }
                     if (dy<0)
                     {
-                        y = i * 32 + 32;//аналогично с ходьбой вверх. dy<0, значит мы идем вверх (вспоминаем координаты паинта)
+                        y = i * 32 + 32;
+                        break;//аналогично с ходьбой вверх. dy<0, значит мы идем вверх (вспоминаем координаты паинта)
                     }
                     if (dx>0)
                     {
-                        x = j * 32 - w;//если идем вправо, то координата Х равна стена (символ 0) минус ширина персонажа
+                        x = j * 32 - w;
+                        break;//если идем вправо, то координата Х равна стена (символ 0) минус ширина персонажа
                     }
                     if (dx < 0)
                     {
-                        x = j * 32 + 32;//аналогично идем влево
+                        x = j * 32 + 32;
+                        break;//аналогично идем влево
                     }
                 }
             }
         }
     }
-    FloatRect getRect(){return FloatRect(x, y, w, h);}
+    FloatRect getRect(){return {static_cast<float>(x), static_cast<float>(y), w, h};}
 };
 
 /*//effort to do a sound and image destroyed o enemy
