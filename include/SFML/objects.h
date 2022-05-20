@@ -3,7 +3,7 @@ using namespace sf;
 
 class Tank { // класс Игрока
 private:
-    int Score;
+    int Score = 0;
     int lives;
     float x, y, speed;
     float dx, dy;
@@ -85,16 +85,16 @@ public:
 
     void setDirection(int d){dir = d;}
 
-    int getDirection(){return dir;}
+    int getDirection() const {return dir;}
     void kill(){Score += 20;}
 
-    FloatRect getRect(){return {x, y, w, h};}
+    FloatRect getRect() const {return {x, y, w, h};}
 
     void shotDown(){--lives;}
 
-    int getLives(){return lives;}
+    int getLives() const {return lives;}
 
-    int getScore(){return Score;}
+    int getScore() const {return Score;}
     void newGame()
     {
         dx = 0;dy = 0;speed = 0;dir = 0;
@@ -218,12 +218,12 @@ public:
             }
         }
     }
-    FloatRect getRect()
+    FloatRect getRect() const
     {
         return {static_cast<float>(x), static_cast<float>(y), w, h};
     }
 
-    int getDirection(){return dir;}
+    int getDirection() const {return dir;}
     void setDirection(int direction)
     {
         dir = direction;moveTimer = 0;
@@ -340,7 +340,7 @@ public:
             }
         }
     }
-    FloatRect getRect(){return {static_cast<float>(x), static_cast<float>(y), w, h};}
+    FloatRect getRect() const {return {static_cast<float>(x), static_cast<float>(y), w, h};}
 };
 
 class Pos {

@@ -7,11 +7,68 @@
 #include "SFML/functions.h"
 #include <math.h>
 #include <list>
+#include <fstream>
 
 using namespace sf;
 
 int window_a = 1280;
 int window_b = 960;
+
+
+void authorization()
+{
+    sf::RenderWindow window(sf::VideoMode(960, 540), "in-game authorization");
+    Music music;
+    music.openFromFile("resources/a_music.flac");
+    music.play();music.setLoop(true);music.setVolume(50);
+    Image image;//сфмл изображение
+    Texture texture;//сфмл текстура
+    Sprite sprite;//сфмл спрайт
+    image.loadFromFile("resources/a_back.png");
+    texture.loadFromImage(image);
+    sprite.setTexture(texture);
+    sprite.setPosition(0,0);
+
+    while (1)
+    {
+        Event event;
+        while (window.pollEvent(event))
+        {
+            if (event.type == sf::Event::Closed)
+            {
+                window.close();
+                return;
+            }
+        }
+        window.clear();
+        window.draw(sprite);
+        window.display();
+    }
+}
+
+bool isAuthorized(std::ofstream & scoreTxt)
+{
+    std::string f = "authorization.txt";
+    std::ifstream iffile;
+    iffile.open(f);
+    std::string str;
+    if(!iffile.is_open())
+    {
+        iffile.close();
+        std::cout << "Can't open in file";
+        return false;
+    }
+    iffile >> str;
+    str += '1';
+    if(str == '1')
+    {
+        return false;
+    }
+    str = str.substr(0, str.size()-1);
+    iffile.close();
+    scoreTxt << str << " ";
+    return true;
+}
 
 
 bool menu(RenderWindow & window) {
@@ -78,6 +135,7 @@ std::list<Pos*>::iterator it3;
 bool startGame()
 {
     sf::RenderWindow window(sf::VideoMode(window_a,window_b), "Simple tanks");
+
     bool ans = menu(window);
 
     Music music;

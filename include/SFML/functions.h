@@ -1,5 +1,5 @@
 
-void drawScore(Tank& tank, RenderWindow& window, Text& text)
+void drawScore(const Tank& tank, RenderWindow& window, Text& text)
 {
     std::ostringstream score;
     score << tank.getScore();
@@ -8,7 +8,7 @@ void drawScore(Tank& tank, RenderWindow& window, Text& text)
     window.draw(text);
 }
 
-void drawHearts(Tank& tank, RenderWindow& window, Sprite& heart)
+void drawHearts(const Tank& tank, RenderWindow& window, Sprite& heart)
 {
     for(int i = 0; i <= tank.getLives(); i++)
     {
@@ -83,8 +83,7 @@ void intersect(Enemy* a, Enemy* b)
     }
 }
 
-
-RectangleShape getRect(Vector2f position)
+RectangleShape getRect(const Vector2f& position)
 {
     RectangleShape a;
     a.setSize(Vector2f(400, 100));
@@ -108,7 +107,6 @@ void viceToPlayer(Enemy* enemy, Tank* tank)
     Vector2f t = tank->sprite.getPosition();
     if(abs(e.y - t.y) < 35)
     {
-        if(abs(e.y - t.y) < 33){return;}
         switch(enemy->getDirection())
         {
             case 0:
@@ -135,7 +133,6 @@ void viceToPlayer(Enemy* enemy, Tank* tank)
     }
     if(abs(e.x - t.x) < 35)
     {
-        if(abs(e.x - t.x) < 33){return;}
         switch(enemy->getDirection())
         {
             case 0:
@@ -161,3 +158,4 @@ void viceToPlayer(Enemy* enemy, Tank* tank)
         }
     }
 }
+
